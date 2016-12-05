@@ -37,6 +37,58 @@ import time
 import urllib
 import uuid
 import logging
+import logging.handlers
+import json
+
+
+FORMAT = logging.Formatter('fauxmo : %(message)s')
+flog_out = logging.getLogger('fauxmo')
+flog_out.setLevel(logging.DEBUG)
+
+handler = logging.handlers.SysLogHandler(address = '/dev/log')
+handler.setFormatter(FORMAT)
+
+flog_out.addHandler(handler)
+flog_out.debug('Started')
+
+def encrypt(string):
+        key = 171
+        result = "\0\0\0\0"
+        for i in string:
+                a = key ^ ord(i)
+                key = a
+                result += chr(a)
+        return result
+
+def decrypt(string):
+        key = 171
+        result = ""
+        for i in string:
+                a = key ^ ord(i)
+                key = ord(i)
+                result += chr(a)
+        return result
+
+port = 9999
+
+def tplink(ip,port,cmd):
+	try:
+		sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock_tcp.connect((ip, port))
+		sock_tcp.send(encrypt(cmd))
+		data = sock_tcp.recv(2048)
+		sock_tcp.close()
+		#print "\nSent            : ", cmd
+		#print "\nReceived        : ", decrypt(data[4:])
+		#flog_out.debug("Sent            : " + str(cmd))
+		#flog_out.debug("Received        : " + str(decrypt(data[4:])))
+
+	except socket.error:
+		#print "Cound not connect to host " + ip + ":" + str(port)
+		flog_out.error("Cound not connect to host " + ip + ":" + str(port))
+		#quit("Cound not connect to host " + ip + ":" + str(port))
+
+
 
 # This XML is the minimum needed to define one of our virtual switches
 # to the Amazon Echo
@@ -56,7 +108,8 @@ SETUP_XML = """<?xml version="1.0"?>
 
 
 def dbg(msg):
-    logging.debug(msg)
+    #logging.debug(msg)
+    flog_out.debug(msg)
 
 
 # A simple utility class to wait for incoming data to be
@@ -203,7 +256,14 @@ class fauxmo(upnp_device):
         return self.name
 
     def handle_request(self, data, sender, socket, client_address):
-        if data.find('GET /setup.xml HTTP/1.1') == 0:
+        #if self.name == "living room":
+	#	ip = "livingroom"
+	#elif self.name == "bedroom":
+	#	ip = "bedroom"
+	#else:
+	#	ip = "unknown"
+	#port = 9999
+	if data.find('GET /setup.xml HTTP/1.1') == 0:
             dbg("Responding to setup.xml for %s" % self.name)
             xml = SETUP_XML % {'device_name' : self.name, 'device_serial' : self.serial}
             date_str = email.utils.formatdate(timeval=None, localtime=False, usegmt=True)
@@ -222,11 +282,17 @@ class fauxmo(upnp_device):
             success = False
             if data.find('<BinaryState>1</BinaryState>') != -1:
                 # on
-                dbg("Responding to ON for %s" % self.name)
+		cmd = '{"system":{"set_relay_state":{"state":1}}}'
+		tplink(self.name,port,cmd)
+		dbg("Responding to ON for %s" % self.name)
+		print("Responding to ON for %s" % self.name)
                 success = self.action_handler.on(client_address[0])
             elif data.find('<BinaryState>0</BinaryState>') != -1:
                 # off
-                dbg("Responding to OFF for %s" % self.name)
+		cmd = '{"system":{"set_relay_state":{"state":0}}}'
+		tplink(self.name,port,cmd)
+		dbg("Responding to OFF for %s" % self.name)
+		print("Responding to OFF for %s" % self.name)
                 success = self.action_handler.off(client_address[0])
             else:
                 dbg("Unknown Binary State request:")
