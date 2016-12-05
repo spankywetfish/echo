@@ -5,6 +5,12 @@ Instructions for installation and usage [available on Instructables here](http:/
 
 Brought to you by [FabricateIO](http://fabricate.io)
 
+### Updated by spankywetfish
+
+Integration of code to allow control of TP-Link SmartPlugs based on the work of [softScheck](https://github.com/softScheck/tplink-smartplug)
+          
+Added logging to syslog.
+
 ## Quick Start
 
 1. Create a [Python Virtual Environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
