@@ -51,7 +51,28 @@ handler.setFormatter(FORMAT)
 flog_out.addHandler(handler)
 flog_out.debug('Started')
 
-# Added support for TP-Link SmartPlugs
+# Added support for TP-Link SmartPlugs 
+# Code courtesy of https://github.com/softScheck/tplink-smartplug
+#
+# TP-Link Wi-Fi Smart Plug Protocol Client
+# For use with TP-Link HS-100 or HS-110
+#
+# by Lubomir Stroetmann
+# Copyright 2016 softScheck GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 def encrypt(string):
         key = 171
         result = "\0\0\0\0"
@@ -79,17 +100,11 @@ def tplink(ip,port,cmd):
 		sock_tcp.send(encrypt(cmd))
 		data = sock_tcp.recv(2048)
 		sock_tcp.close()
-		#print "\nSent            : ", cmd
-		#print "\nReceived        : ", decrypt(data[4:])
-		#flog_out.debug("Sent            : " + str(cmd))
-		#flog_out.debug("Received        : " + str(decrypt(data[4:])))
 
 	except socket.error:
-		#print "Cound not connect to host " + ip + ":" + str(port)
 		flog_out.error("Cound not connect to host " + ip + ":" + str(port))
-		#quit("Cound not connect to host " + ip + ":" + str(port))
 
-
+# End of TP-Link code courtesy of https://github.com/softScheck/tplink-smartplug
 
 # This XML is the minimum needed to define one of our virtual switches
 # to the Amazon Echo
