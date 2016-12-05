@@ -40,7 +40,7 @@ import logging
 import logging.handlers
 import json
 
-
+#Added syslog output 
 FORMAT = logging.Formatter('fauxmo : %(message)s')
 flog_out = logging.getLogger('fauxmo')
 flog_out.setLevel(logging.DEBUG)
@@ -51,6 +51,7 @@ handler.setFormatter(FORMAT)
 flog_out.addHandler(handler)
 flog_out.debug('Started')
 
+# Added support for TP-Link SmartPlugs
 def encrypt(string):
         key = 171
         result = "\0\0\0\0"
@@ -256,13 +257,6 @@ class fauxmo(upnp_device):
         return self.name
 
     def handle_request(self, data, sender, socket, client_address):
-        #if self.name == "living room":
-	#	ip = "livingroom"
-	#elif self.name == "bedroom":
-	#	ip = "bedroom"
-	#else:
-	#	ip = "unknown"
-	#port = 9999
 	if data.find('GET /setup.xml HTTP/1.1') == 0:
             dbg("Responding to setup.xml for %s" % self.name)
             xml = SETUP_XML % {'device_name' : self.name, 'device_serial' : self.serial}
