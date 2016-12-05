@@ -21,7 +21,8 @@ import time
 
 from debounce_handler import debounce_handler
 
-#logging.basicConfig(level=logging.DEBUG)
+
+# Added logging to syslog
 
 FORMAT = logging.Formatter('SmartHome : %(message)s')
 
@@ -39,7 +40,8 @@ class device_handler(debounce_handler):
     """Publishes the on/off state requested,
        and the IP address of the Echo making the request.
     """
-    #TRIGGERS = {"device": 52000}
+    # Example triggers - local DNS entries or host file must match TRIGGER names
+    # as the modifications to fauxm.py means the names are used to resolve the TP-Link SmartPlug devices 
     TRIGGERS = {"livingroom": 52001, "bedroom": 52002, "officelights": 52003, "livingroom2": 52004}
     def act(self, client_address, state):
         print "State", state, "from client @", client_address
@@ -60,7 +62,6 @@ if __name__ == "__main__":
         fauxmo.fauxmo(trig, u, p, None, port, d)
 
     # Loop and poll for incoming Echo requests
-    #logging.debug("Entering fauxmo polling loop")
     log_out.debug("Entering fauxmo polling loop")
     while True:
         try:
@@ -68,6 +69,5 @@ if __name__ == "__main__":
             p.poll(100)
             time.sleep(0.1)
         except Exception, e:
-            #logging.critical("Critical exception: " + str(e))
             log_out.critical("Critical exception: " + str(e))
             break
